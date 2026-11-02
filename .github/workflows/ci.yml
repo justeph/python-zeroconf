@@ -2,9 +2,7 @@ name: CI
 
 on:
   push:
-    branches:
-      - master
-      - release-0.x
+    branches: ["**"]
   pull_request:
 
 concurrency:
@@ -245,8 +243,6 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
   build_wheels:
-    needs: [release]
-    if: needs.release.outputs.released == 'true'
 
     name: Wheels for ${{ matrix.os }} (${{ matrix.musl == 'musllinux' && 'musllinux' || 'manylinux' }}) ${{ matrix.qemu }} ${{ matrix.pyver }}
     runs-on: ${{ matrix.os }}
@@ -394,7 +390,7 @@ jobs:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v4
         with:
-          ref: ${{ needs.release.outputs.newest_release_tag }}
+          ref: ${{ github.ref }}
           fetch-depth: 0
 
       - name: Build wheels ${{ matrix.musl }} (${{ matrix.qemu }})
@@ -413,6 +409,7 @@ jobs:
 
   upload_pypi:
     needs: [build_wheels]
+    if: false
     runs-on: ubuntu-latest
     environment: release
     permissions:
